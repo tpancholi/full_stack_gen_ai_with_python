@@ -26,7 +26,7 @@ dev = [
 
 [tool.pyright]
 exclude = [".venv", "build", "dist"]
-pythonVersion = "3.13"
+pythonVersion = "3.10"
 venvPath = "."
 venv = ".venv"
 # Enhanced type checking for GenAI projects
@@ -43,7 +43,7 @@ reportIncompatibleMethodOverride = true
 reportIncompatibleVariableOverride = true
 
 [tool.mypy]
-python_version = "3.13"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false  # Start permissive, can tighten later
@@ -125,9 +125,9 @@ exclude = [
 ]
 
 # Code formatting
-line-length = 88
+line-length = 120
 indent-width = 4
-target-version = "py313"
+target-version = "py310"
 
 # CLI usage examples:
 # uv run ruff check . --fix --show-fixes --show-files
@@ -492,7 +492,7 @@ staticmethod-decorators = ["staticmethod"]
 [tool.ruff.lint.pycodestyle]
 # Line length settings
 ignore-overlong-task-comments = true
-max-doc-length = 88
+max-doc-length = 120
 
 [tool.ruff.lint.pydocstyle]
 # Docstring style (Google style)

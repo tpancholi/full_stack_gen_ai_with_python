@@ -21,6 +21,7 @@ Commands:
 from __future__ import annotations
 
 import argparse
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -51,13 +52,14 @@ class DevWorkflow:
     def _has_uv(self) -> bool:
         """Check if uv is available."""
         try:
-            subprocess.run(["uv", "--version"], capture_output=True, check=True)
-            return True
+            subprocess.run(["uv", "--version"], capture_output=True, check=True)  # noqa: S607
+            return True  # noqa: TRY300
         except (subprocess.CalledProcessError, FileNotFoundError):
             return False
 
     def _run_command(
         self,
+        *,
         command: str,
         description: str,
         check: bool = True,
@@ -77,18 +79,12 @@ class DevWorkflow:
                 capture_output=False,
             )
             if result.returncode == 0:
-                print(
-                    f"{Colors.GREEN}✅ {description} completed successfully{Colors.END}"
-                )
+                print(f"{Colors.GREEN}✅ {description} completed successfully{Colors.END}")
             else:
-                print(
-                    f"{Colors.YELLOW}⚠️  {description} completed with warnings{Colors.END}"
-                )
-            return result
+                print(f"{Colors.YELLOW}⚠️  {description} completed with warnings{Colors.END}")
+            return result  # noqa: TRY300
         except subprocess.CalledProcessError as e:
-            print(
-                f"{Colors.RED}❌ {description} failed with exit code {e.returncode}{Colors.END}"
-            )
+            print(f"{Colors.RED}❌ {description} failed with exit code {e.returncode}{Colors.END}")
             if check:
                 raise
             return e
@@ -105,23 +101,19 @@ class DevWorkflow:
 
         # Install dependencies
         if self._has_uv():
-            self._run_command("uv sync --dev", "Installing dependencies with uv")
+            self._run_command(command="uv sync --dev", description="Installing dependencies with uv")
         else:
-            self._run_command(
-                "pip install -e .", "Installing project in development mode"
-            )
+            self._run_command(command="pip install -e .", description="Installing project in development mode")
 
         # Setup pre-commit
-        self._run_command(
-            f"{self.python_cmd} pre-commit install", "Installing pre-commit hooks"
-        )
+        self._run_command(command=f"{self.python_cmd} pre-commit install", description="Installing pre-commit hooks")
 
         # Initialize secrets baseline
         secrets_baseline = self.root_dir / ".secrets.baseline"
         if not secrets_baseline.exists():
             self._run_command(
-                f"{self.python_cmd} detect-secrets scan --baseline .secrets.baseline",
-                "Creating secrets detection baseline",
+                command=f"{self.python_cmd} detect-secrets scan --baseline .secrets.baseline",
+                description="Creating secrets detection baseline",
             )
 
         # Create necessary directories
@@ -243,8 +235,6 @@ def test_imports():
         """Clean up temporary files."""
         self._print_header("Cleaning Temporary Files")
 
-        import shutil
-
         cleanup_patterns = [
             "**/__pycache__",
             "**/*.pyc",
@@ -324,9 +314,7 @@ def test_imports():
         self._print_header("Updating Dependencies")
 
         if self._has_uv():
-            self._run_command(
-                "uv sync --dev --upgrade", "Updating dependencies with uv"
-            )
+            self._run_command("uv sync --dev --upgrade", "Updating dependencies with uv")
         else:
             self._run_command("pip install --upgrade -e .[dev]", "Updating with pip")
 
@@ -338,9 +326,7 @@ def main() -> NoReturn:
     """Main entry point."""
     workflow = DevWorkflow()
 
-    parser = argparse.ArgumentParser(
-        description="Development workflow automation for GenAI Python projects"
-    )
+    parser = argparse.ArgumentParser(description="Development workflow automation for GenAI Python projects")
     parser.add_argument(
         "command",
         choices=[
