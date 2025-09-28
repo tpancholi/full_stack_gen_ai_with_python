@@ -4,45 +4,70 @@ from __future__ import annotations
 
 import logging
 import sys
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-# Define available snacks as a constant
+# Error message constants
+ERROR_MESSAGES = {
+    "no_input": "No input provided",
+    "interrupted": "User interrupted input",
+    "no_data": "No input received",
+    "invalid_choice": "Invalid snack choice",
+}
+
 AVAILABLE_SNACKS = {"pizza", "pasta"}
 
 
-def get_user_input() -> str:
-    """Get user input from console.
+class SnackSelectorError(Exception):
+    """Base exception for snack selector errors."""
 
-    Returns:
-        str: User input in lowercase, or 'error' if invalid
-    """
+
+class InvalidInputError(SnackSelectorError):
+    """Raised when user provides invalid input."""
+
+    def __init__(self, error_code: str):
+        self.error_code = error_code
+        messages = {
+            "no_input": "No input provided",
+            "interrupted": "User interrupted input",
+            "no_data": "No input received",
+        }
+        super().__init__(messages.get(error_code, "Unknown input error"))
+
+
+def get_user_input() -> str:
+    """Get user input from console."""
     try:
         user_input = input("\nPlease provide your choice of snack: ")
-        # Better validation - check if input is not empty after stripping
         cleaned_input = user_input.strip()
-        return cleaned_input.lower() if cleaned_input else "error"
-    except KeyboardInterrupt:
-        logger.info("\nGoodbye!")
-        sys.exit(0)
-    except EOFError:
-        logger.info("\nNo input received. Exiting...")
-        sys.exit(0)
+
+        if not cleaned_input:
+            raise InvalidInputError(ERROR_MESSAGES["no_input"])
+
+        return cleaned_input.lower()
+
+    except KeyboardInterrupt as e:
+        raise InvalidInputError(ERROR_MESSAGES["interrupted"]) from e
+    except EOFError as e:
+        raise InvalidInputError(ERROR_MESSAGES["no_data"]) from e
 
 
 def is_snack_available(snack: str) -> bool:
-    """Check if the requested snack is available.
-
-    Args:
-        snack: The snack to check
-
-    Returns:
-        bool: True if snack is available, False otherwise
-    """
+    """Check if the requested snack is available."""
     return snack in AVAILABLE_SNACKS
 
 
-def main():
+def process_snack_request(snack: str) -> None:
+    """Process the snack request and log the appropriate response."""
+    if is_snack_available(snack):
+        logger.info("Here you go %s", snack)
+    else:
+        available_list = ", ".join(sorted(AVAILABLE_SNACKS))
+        logger.info("Sorry, we don't have %s in our menu. Available options: %s", snack, available_list)
+
+
+def main() -> None:
     """Main function to run the snack selector."""
     logging.basicConfig(
         level=logging.INFO,
@@ -50,15 +75,16 @@ def main():
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    user_input = get_user_input()
+    try:
+        user_input = get_user_input()
+        process_snack_request(user_input)
 
-    if user_input == "error":
-        logger.error("Invalid input provided. Exiting...")
-        sys.exit(1)  # Use exit code 1 for error
-    elif is_snack_available(user_input):
-        logger.info("Here you go %s", user_input)
-    else:
-        logger.info("Sorry, we don't have %s in our menu. Please try something else.", user_input)
+    except InvalidInputError as e:
+        logger.exception("Invalid input: %s", e)
+        sys.exit(1)
+    except Exception as e:
+        logger.exception("Unexpected error: %s", e)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
