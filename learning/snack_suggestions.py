@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import sys
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -79,11 +78,11 @@ def main() -> None:
         user_input = get_user_input()
         process_snack_request(user_input)
 
-    except InvalidInputError as e:
-        logger.exception("Invalid input: %s", e)
+    except InvalidInputError:
+        logger.exception("Invalid input")
         sys.exit(1)
-    except Exception as e:
-        logger.exception("Unexpected error: %s", e)
+    except Exception:
+        logger.exception("Unexpected error")
         sys.exit(1)
 
 
