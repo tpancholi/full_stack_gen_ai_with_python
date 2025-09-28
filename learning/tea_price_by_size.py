@@ -1,4 +1,4 @@
-"""Check and provide snack if available else ask user to pick something else from menu"""
+"""A program to calculate tea price by cup size"""
 
 from __future__ import annotations
 
@@ -15,46 +15,42 @@ ERROR_MESSAGES = {
     "invalid_choice": "Invalid snack choice",
 }
 
-AVAILABLE_SNACKS = {"pizza", "pasta"}
+PRICE_CHART = {
+    "small": 10,
+    "medium": 15,
+    "large": 20,
+}
 
 
-class SnackSelectorError(Exception):
-    """Base exception for snack selector errors."""
+class CupSizeSelectorError(Exception):
+    """Base exception for cup size selector errors."""
 
 
-class InvalidInputError(SnackSelectorError):
+class InvalidInputError(CupSizeSelectorError):
     """Raised when the user provides invalid input."""
 
 
 def get_user_input() -> str:
     """Get user input from the console."""
     try:
-        user_input = input("\nPlease provide your choice of snack: ")
-        cleaned_input = user_input.strip()
+        user_input = input("\nPlease provide your choice of cup size: ")
+        cleaned_input = user_input.strip().lower()
 
         if not cleaned_input:
             raise InvalidInputError(ERROR_MESSAGES["no_input"])
-
-        return cleaned_input.lower()
-
+        return cleaned_input  # noqa: TRY300
     except KeyboardInterrupt as e:
         raise InvalidInputError(ERROR_MESSAGES["interrupted"]) from e
     except EOFError as e:
         raise InvalidInputError(ERROR_MESSAGES["no_data"]) from e
 
 
-def is_snack_available(snack: str) -> bool:
-    """Check if the requested snack is available."""
-    return snack in AVAILABLE_SNACKS
-
-
-def process_snack_request(snack: str) -> None:
-    """Process the snack request and log the appropriate response."""
-    if is_snack_available(snack):
-        logger.info("Here you go %s", snack)
+def process_user_request(user_input: str) -> None:
+    """Process the user request and ask for the appropriate price"""
+    if user_input in PRICE_CHART:
+        logger.info("Price of %s cup of team would be %d", user_input, PRICE_CHART[user_input])
     else:
-        available_list = ", ".join(sorted(AVAILABLE_SNACKS))
-        logger.info("Sorry, we don't have %s in our menu. Available options: %s", snack, available_list)
+        logger.info("Sorry, unknown cup size. Please try again later.")
 
 
 def main() -> None:
@@ -64,11 +60,9 @@ def main() -> None:
         format="%(asctime)s.%(msecs)03d - %(levelname)s - %(module)s:%(lineno)d - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
-
     try:
         user_input = get_user_input()
-        process_snack_request(user_input)
-
+        process_user_request(user_input)
     except InvalidInputError:
         logger.exception("Invalid input")
         sys.exit(1)
