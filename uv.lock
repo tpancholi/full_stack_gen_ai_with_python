@@ -386,7 +386,7 @@ wheels = [
 [[package]]
 name = "full-stack-gen-ai-with-python"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 
 [package.dev-dependencies]
 dev = [

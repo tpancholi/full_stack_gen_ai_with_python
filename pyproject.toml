@@ -26,11 +26,11 @@ dev = [
 
 [tool.pyright]
 exclude = [".venv", "build", "dist"]
-pythonVersion = "3.10"
+pythonVersion = "3.13"
 venvPath = "."
 venv = ".venv"
 # Enhanced type checking for GenAI projects
-typeCheckingMode = "basic"  # Can upgrade to "strict" as team matures
+typeCheckingMode = "strict"  # Can upgrade to "strict" as team matures
 reportMissingImports = true
 reportMissingTypeStubs = false
 reportOptionalMemberAccess = true
@@ -41,12 +41,14 @@ reportUnusedVariable = true
 # AI / ML-specific settings
 reportIncompatibleMethodOverride = true
 reportIncompatibleVariableOverride = true
+autoImportCompletions = true
+autoSearchPaths = true
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.13"
 warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = false  # Start permissive, can tighten later
+disallow_untyped_defs = true  # Start permissive, can tighten later
 disallow_incomplete_defs = true
 check_untyped_defs = true
 disallow_untyped_decorators = false  # Many AI libraries use untyped decorators
@@ -127,7 +129,8 @@ exclude = [
 # Code formatting
 line-length = 120
 indent-width = 4
-target-version = "py310"
+target-version = "py313"
+cache-dir = ".ruff_cache"
 
 # CLI usage examples:
 # uv run ruff check . --fix --show-fixes --show-files
@@ -595,3 +598,10 @@ hardcoded_tmp_directory_extensions = ["tmp", "temp", "cache"]
 # Additional bandit configuration for GenAI projects
 [tool.bandit.assert_used]
 skips = ["*/test_*.py", "*/tests/*", "*_test.py"]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+genai = "full_stack_gen_ai.cli:main"
